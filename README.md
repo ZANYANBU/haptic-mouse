@@ -14,6 +14,10 @@ By dynamically binding to Apple's private `MultitouchSupport` framework, it inte
 
 ---
 
+![HapticMouse Menu Bar Interface](assets/screenshot.jpg)
+
+---
+
 ## ✨ Features
 
 * **🎛️ Real-Time Vibration Control:** Tap the menu-bar status icon (`📳`) to adjust feedback strength on the fly:
