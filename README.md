@@ -18,6 +18,10 @@
 
 ## ✨ Features
 
+* **⌨️ Mechanical Keyboard Emulation (Key Weights):** Types feel like physical keycaps. Specific keycodes are mapped to custom taptic vibrations:
+  - **Spacebar & Return:** Heavy, deep physical click responses (`actuationID: 2`, `1.0` base intensity).
+  - **Delete/Backspace:** Crisp, solid mechanical click feel (`actuationID: 2`, `0.8` base intensity).
+  - **Letters & Numbers:** Light, crisp micro-pulse ticks (`actuationID: 1`, `0.9` base intensity) that simulate quiet brown switches.
 * **🎛️ Modular Feature Toggles:** Enable or disable haptic categories independently from the menu-bar dropdown checklist:
   - **Tactile Keyboard Typing:** Adds mechanical typing ticks to your internal keyboard presses.
   - **Tactile Mouse Scrolling:** Converts scroll wheel clicks from any USB/Bluetooth mouse into physical scroll notches.

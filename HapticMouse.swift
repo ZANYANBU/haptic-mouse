@@ -278,6 +278,24 @@ class HapticApp: NSObject, NSApplicationDelegate {
         }
     }
     
+    // Mechanical Keyboard Simulation: Maps specific keycodes to target haptic profiles
+    func hapticFor(keyCode: Int64) -> (actuationID: Int32, baseIntensity: Float) {
+        switch keyCode {
+        case 49, 36: // Spacebar (49), Return (36)
+            // Heavy mechanical switch simulation (Standard Click ID 2)
+            return (actuationID: 2, baseIntensity: 1.0)
+        case 51: // Delete/Backspace
+            // Crisp mechanical feedback (Standard Click ID 2, slightly softer)
+            return (actuationID: 2, baseIntensity: 0.8)
+        case 48, 53: // Tab (48), Escape (53)
+            // Medium physical key response
+            return (actuationID: 2, baseIntensity: 0.7)
+        default:
+            // Standard letter/number keys (Crisp Micro-pulse Tick ID 1)
+            return (actuationID: 1, baseIntensity: 0.9)
+        }
+    }
+    
     func setupEventTap() {
         let eventMask = (1 << CGEventType.leftMouseDown.rawValue) |
                         (1 << CGEventType.rightMouseDown.rawValue) |
@@ -299,7 +317,6 @@ class HapticApp: NSObject, NSApplicationDelegate {
                 let currentTime = ProcessInfo.processInfo.systemUptime * 1000.0
                 if (currentTime - mySelf.lastClickTime) >= 50.0 {
                     mySelf.lastClickTime = currentTime
-                    // Scale standard click feedback with custom slider value
                     mySelf.triggerHaptics(actuationID: 2, intensity: 1.0 * mySelf.intensityMultiplier)
                 }
                 
@@ -311,7 +328,6 @@ class HapticApp: NSObject, NSApplicationDelegate {
                         let currentTime = ProcessInfo.processInfo.systemUptime * 1000.0
                         if (currentTime - mySelf.lastScrollTime) >= 100.0 {
                             mySelf.lastScrollTime = currentTime
-                            // Scale scroll ticks with custom slider value
                             mySelf.triggerHaptics(actuationID: 1, intensity: 0.7 * mySelf.intensityMultiplier)
                         }
                     }
@@ -324,8 +340,12 @@ class HapticApp: NSObject, NSApplicationDelegate {
                     let currentTime = ProcessInfo.processInfo.systemUptime * 1000.0
                     if (currentTime - mySelf.lastKeyTime) >= 120.0 {
                         mySelf.lastKeyTime = currentTime
-                        // Scale typing feedback with custom slider value
-                        mySelf.triggerHaptics(actuationID: 1, intensity: 0.9 * mySelf.intensityMultiplier)
+                        
+                        // Query keycode and fetch its specific mechanical haptic profile
+                        let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
+                        let haptic = mySelf.hapticFor(keyCode: keyCode)
+                        
+                        mySelf.triggerHaptics(actuationID: haptic.actuationID, intensity: haptic.baseIntensity * mySelf.intensityMultiplier)
                     }
                 }
                 
