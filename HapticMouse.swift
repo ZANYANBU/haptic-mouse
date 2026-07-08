@@ -116,6 +116,11 @@ class HapticApp: NSObject, NSApplicationDelegate {
     var lastKeyTime: Double = 0.0
     var lastClickTime: Double = 0.0
     
+    // Feature Toggles
+    var isKeyboardEnabled: Bool = true
+    var isScrollEnabled: Bool = true
+    var isClicksEnabled: Bool = true
+    
     // Configurable vibration multiplier (Low: ~0.5, Medium: ~1.2, High: ~2.0)
     var intensityMultiplier: Float = 1.2
     
@@ -137,7 +142,7 @@ class HapticApp: NSObject, NSApplicationDelegate {
     func setupMenu() {
         let menu = NSMenu()
         
-        // 1. Enable Toggle
+        // 1. Master Toggle
         let enableItem = NSMenuItem(title: "Haptic Feedback Enabled", action: #selector(toggleEnable), keyEquivalent: "e")
         enableItem.target = self
         enableItem.state = isEnabled ? .on : .off
@@ -145,7 +150,25 @@ class HapticApp: NSObject, NSApplicationDelegate {
         
         menu.addItem(NSMenuItem.separator())
         
-        // 2. Custom Slider Menu Item
+        // 2. Feature Toggles
+        let kbItem = NSMenuItem(title: "Tactile Keyboard Typing", action: #selector(toggleKeyboard), keyEquivalent: "")
+        kbItem.target = self
+        kbItem.state = isKeyboardEnabled ? .on : .off
+        menu.addItem(kbItem)
+        
+        let scrollItem = NSMenuItem(title: "Tactile Mouse Scrolling", action: #selector(toggleScroll), keyEquivalent: "")
+        scrollItem.target = self
+        scrollItem.state = isScrollEnabled ? .on : .off
+        menu.addItem(scrollItem)
+        
+        let clickItem = NSMenuItem(title: "Tactile Mouse Clicks", action: #selector(toggleClicks), keyEquivalent: "")
+        clickItem.target = self
+        clickItem.state = isClicksEnabled ? .on : .off
+        menu.addItem(clickItem)
+        
+        menu.addItem(NSMenuItem.separator())
+        
+        // 3. Custom Slider Menu Item
         let sliderItem = NSMenuItem()
         let sliderView = HapticSliderView(frame: NSRect(x: 0, y: 0, width: 220, height: 52), initialValue: intensityMultiplier)
         sliderView.updateHandler = { [weak self] value in
@@ -164,12 +187,33 @@ class HapticApp: NSObject, NSApplicationDelegate {
         
         menu.addItem(NSMenuItem.separator())
         
-        // 3. Quit Option
+        // 4. Quit Option
         let quitItem = NSMenuItem(title: "Quit HapticMouse", action: #selector(quitApp), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
         
         statusItem.menu = menu
+    }
+    
+    @objc func toggleKeyboard() {
+        isKeyboardEnabled.toggle()
+        if let menu = statusItem.menu, let item = menu.items.first(where: { $0.title == "Tactile Keyboard Typing" }) {
+            item.state = isKeyboardEnabled ? .on : .off
+        }
+    }
+    
+    @objc func toggleScroll() {
+        isScrollEnabled.toggle()
+        if let menu = statusItem.menu, let item = menu.items.first(where: { $0.title == "Tactile Mouse Scrolling" }) {
+            item.state = isScrollEnabled ? .on : .off
+        }
+    }
+    
+    @objc func toggleClicks() {
+        isClicksEnabled.toggle()
+        if let menu = statusItem.menu, let item = menu.items.first(where: { $0.title == "Tactile Mouse Clicks" }) {
+            item.state = isClicksEnabled ? .on : .off
+        }
     }
     
     @objc func toggleEnable() {
@@ -251,6 +295,7 @@ class HapticApp: NSObject, NSApplicationDelegate {
             
             switch type {
             case .leftMouseDown, .rightMouseDown, .otherMouseDown:
+                if !mySelf.isClicksEnabled { break }
                 let currentTime = ProcessInfo.processInfo.systemUptime * 1000.0
                 if (currentTime - mySelf.lastClickTime) >= 50.0 {
                     mySelf.lastClickTime = currentTime
@@ -259,6 +304,7 @@ class HapticApp: NSObject, NSApplicationDelegate {
                 }
                 
             case .scrollWheel:
+                if !mySelf.isScrollEnabled { break }
                 if isContinuous == 0 {
                     let deltaY = event.getIntegerValueField(.scrollWheelEventDeltaAxis1)
                     if deltaY != 0 {
@@ -272,6 +318,7 @@ class HapticApp: NSObject, NSApplicationDelegate {
                 }
                 
             case .keyDown:
+                if !mySelf.isKeyboardEnabled { break }
                 let isAutorepeat = event.getIntegerValueField(.keyboardEventAutorepeat) != 0
                 if !isAutorepeat {
                     let currentTime = ProcessInfo.processInfo.systemUptime * 1000.0

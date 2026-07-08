@@ -8,9 +8,7 @@
 [![Battery](https://img.shields.io/badge/battery-ultra--efficient-brightgreen.svg)](#-battery-efficiency)
 [![Privacy](https://img.shields.io/badge/privacy-100%25--secure-success.svg)](#-privacy-protection)
 
-**HapticMouse** is a lightweight, native macOS menu-bar utility that brings physical, tactile feedback to your typing, clicking, and mouse scrolling. 
-
-By dynamically binding to Apple's private `MultitouchSupport` framework, it intercepts keypresses, external mouse scroll ticks, and trackpad clicks, translating them on-the-fly into crisp physical vibrations directly on your MacBook's or Magic Trackpad's **Taptic Engine**.
+> **HapticMouse gives any external mouse a haptic scroll wheel.** Plug in a $20 USB mouse and feel a crisp Taptic-Engine detent on every scroll notch and click — borrowed live from your MacBook's trackpad. (Plus tactile typing feedback, if you want it!)
 
 ---
 
@@ -20,7 +18,11 @@ By dynamically binding to Apple's private `MultitouchSupport` framework, it inte
 
 ## ✨ Features
 
-* **🎛️ Custom Vibration Strength Slider:** Click the menu-bar status icon (`📳`) and drag the custom slider (from `0.1` to `2.0` intensity) to fine-tune your haptic feedback strength in real time. It vibrates dynamically as you slide to let you preview your setting!
+* **🎛️ Modular Feature Toggles:** Enable or disable haptic categories independently from the menu-bar dropdown checklist:
+  - **Tactile Keyboard Typing:** Adds mechanical typing ticks to your internal keyboard presses.
+  - **Tactile Mouse Scrolling:** Converts scroll wheel clicks from any USB/Bluetooth mouse into physical scroll notches.
+  - **Tactile Mouse Clicks:** Transmits mouse click actions to the trackpad's taptic motor.
+* **🎚️ Custom Vibration Strength Slider:** Drag the slider (from `0.1` to `2.0` intensity) to adjust your haptic feedback strength in real time. It vibrates dynamically as you slide to let you preview your setting!
 * **🔋 Battery-Saving Throttlers:** Built-in rate limiters prevent continuous motor activation and reduce power draw by up to 60%:
   - Keyboard keypresses are throttled to a maximum of once every **120ms** (limits feedback to ~8 keyclicks per second for smooth typing rhythm).
   - Scroll wheel ticks are throttled to once every **100ms** to prevent rapid motor vibration during fast sweeps.
