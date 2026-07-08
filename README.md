@@ -20,10 +20,7 @@ By dynamically binding to Apple's private `MultitouchSupport` framework, it inte
 
 ## ✨ Features
 
-* **🎛️ Real-Time Vibration Control:** Tap the menu-bar status icon (`📳`) to adjust feedback strength on the fly:
-  - `Low` (Battery Saver): Subtle, silent ticks using minimal motor stroke.
-  - `Medium` (Balanced): Natural mechanical feel, ideal for everyday typing.
-  - `High` (Powerful): Strong, solid clicks that simulate deep physical button presses.
+* **🎛️ Custom Vibration Strength Slider:** Click the menu-bar status icon (`📳`) and drag the custom slider (from `0.1` to `2.0` intensity) to fine-tune your haptic feedback strength in real time. It vibrates dynamically as you slide to let you preview your setting!
 * **🔋 Battery-Saving Throttlers:** Built-in rate limiters prevent continuous motor activation and reduce power draw by up to 60%:
   - Keyboard keypresses are throttled to a maximum of once every **120ms** (limits feedback to ~8 keyclicks per second for smooth typing rhythm).
   - Scroll wheel ticks are throttled to once every **100ms** to prevent rapid motor vibration during fast sweeps.

@@ -66,6 +66,46 @@ func getTrackpadDeviceID() -> UInt64 {
     return 0x200000001000000
 }
 
+// Custom View containing an NSSlider for the Menu Bar dropdown
+class HapticSliderView: NSView {
+    var slider: NSSlider!
+    var label: NSTextField!
+    var updateHandler: ((Float) -> Void)?
+    
+    init(frame frameRect: NSRect, initialValue: Float) {
+        super.init(frame: frameRect)
+        
+        // 1. Text Label
+        label = NSTextField(frame: NSRect(x: 16, y: 30, width: 190, height: 18))
+        label.isEditable = false
+        label.isBordered = false
+        label.drawsBackground = false
+        label.stringValue = String(format: "Vibration Strength: %.1f", initialValue)
+        label.font = NSFont.systemFont(ofSize: 12, weight: .medium)
+        label.textColor = NSColor.labelColor
+        self.addSubview(label)
+        
+        // 2. Horizontal Slider
+        slider = NSSlider(frame: NSRect(x: 14, y: 8, width: 190, height: 20))
+        slider.minValue = 0.1
+        slider.maxValue = 2.0
+        slider.doubleValue = Double(initialValue)
+        slider.target = self
+        slider.action = #selector(sliderChanged(_:))
+        self.addSubview(slider)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    @objc func sliderChanged(_ sender: NSSlider) {
+        let val = Float(sender.doubleValue)
+        label.stringValue = String(format: "Vibration Strength: %.1f", val)
+        updateHandler?(val)
+    }
+}
+
 class HapticApp: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem!
     var eventTap: CFMachPort?
@@ -76,8 +116,11 @@ class HapticApp: NSObject, NSApplicationDelegate {
     var lastKeyTime: Double = 0.0
     var lastClickTime: Double = 0.0
     
-    // Configurable vibration multiplier (Low: 0.6, Medium: 1.2, High: 2.0)
+    // Configurable vibration multiplier (Low: ~0.5, Medium: ~1.2, High: ~2.0)
     var intensityMultiplier: Float = 1.2
+    
+    // Rate limit to prevent feedback storms when moving the slider
+    var lastFeedbackTime: Double = 0.0
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Create Status Bar Item in the Menu Bar
@@ -102,27 +145,22 @@ class HapticApp: NSObject, NSApplicationDelegate {
         
         menu.addItem(NSMenuItem.separator())
         
-        // 2. Vibration Strength Submenu
-        let intensityMenu = NSMenu()
-        
-        let lowItem = NSMenuItem(title: "Low (Battery Saver)", action: #selector(setLowIntensity), keyEquivalent: "1")
-        lowItem.target = self
-        lowItem.state = (intensityMultiplier == 0.6) ? .on : .off
-        intensityMenu.addItem(lowItem)
-        
-        let medItem = NSMenuItem(title: "Medium (Balanced)", action: #selector(setMediumIntensity), keyEquivalent: "2")
-        medItem.target = self
-        medItem.state = (intensityMultiplier == 1.2) ? .on : .off
-        intensityMenu.addItem(medItem)
-        
-        let highItem = NSMenuItem(title: "High (Powerful)", action: #selector(setHighIntensity), keyEquivalent: "3")
-        highItem.target = self
-        highItem.state = (intensityMultiplier == 2.0) ? .on : .off
-        intensityMenu.addItem(highItem)
-        
-        let intensityParentItem = NSMenuItem(title: "Vibration Strength", action: nil, keyEquivalent: "")
-        intensityParentItem.submenu = intensityMenu
-        menu.addItem(intensityParentItem)
+        // 2. Custom Slider Menu Item
+        let sliderItem = NSMenuItem()
+        let sliderView = HapticSliderView(frame: NSRect(x: 0, y: 0, width: 220, height: 52), initialValue: intensityMultiplier)
+        sliderView.updateHandler = { [weak self] value in
+            guard let self = self else { return }
+            self.intensityMultiplier = value
+            
+            // Provide tactile feedback during dragging (throttled to 80ms)
+            let currentTime = ProcessInfo.processInfo.systemUptime * 1000.0
+            if (currentTime - self.lastFeedbackTime) >= 80.0 {
+                self.lastFeedbackTime = currentTime
+                self.triggerHaptics(actuationID: 1, intensity: value)
+            }
+        }
+        sliderItem.view = sliderView
+        menu.addItem(sliderItem)
         
         menu.addItem(NSMenuItem.separator())
         
@@ -132,35 +170,6 @@ class HapticApp: NSObject, NSApplicationDelegate {
         menu.addItem(quitItem)
         
         statusItem.menu = menu
-    }
-    
-    @objc func setLowIntensity() {
-        intensityMultiplier = 0.6
-        updateIntensityMenuState()
-        // Provide immediate feedback vibration to let user test the strength
-        triggerHaptics(actuationID: 1, intensity: 0.6)
-    }
-    
-    @objc func setMediumIntensity() {
-        intensityMultiplier = 1.2
-        updateIntensityMenuState()
-        triggerHaptics(actuationID: 1, intensity: 1.2)
-    }
-    
-    @objc func setHighIntensity() {
-        intensityMultiplier = 2.0
-        updateIntensityMenuState()
-        triggerHaptics(actuationID: 2, intensity: 2.0)
-    }
-    
-    func updateIntensityMenuState() {
-        guard let menu = statusItem.menu,
-              let parentItem = menu.items.first(where: { $0.title == "Vibration Strength" }),
-              let subMenu = parentItem.submenu else { return }
-              
-        subMenu.items[0].state = (intensityMultiplier == 0.6) ? .on : .off
-        subMenu.items[1].state = (intensityMultiplier == 1.2) ? .on : .off
-        subMenu.items[2].state = (intensityMultiplier == 2.0) ? .on : .off
     }
     
     @objc func toggleEnable() {
@@ -245,7 +254,7 @@ class HapticApp: NSObject, NSApplicationDelegate {
                 let currentTime = ProcessInfo.processInfo.systemUptime * 1000.0
                 if (currentTime - mySelf.lastClickTime) >= 50.0 {
                     mySelf.lastClickTime = currentTime
-                    // Apply intensity multiplier to click feedback
+                    // Scale standard click feedback with custom slider value
                     mySelf.triggerHaptics(actuationID: 2, intensity: 1.0 * mySelf.intensityMultiplier)
                 }
                 
@@ -256,7 +265,7 @@ class HapticApp: NSObject, NSApplicationDelegate {
                         let currentTime = ProcessInfo.processInfo.systemUptime * 1000.0
                         if (currentTime - mySelf.lastScrollTime) >= 100.0 {
                             mySelf.lastScrollTime = currentTime
-                            // Apply intensity multiplier to scroll notches (tick profile)
+                            // Scale scroll ticks with custom slider value
                             mySelf.triggerHaptics(actuationID: 1, intensity: 0.7 * mySelf.intensityMultiplier)
                         }
                     }
@@ -268,7 +277,7 @@ class HapticApp: NSObject, NSApplicationDelegate {
                     let currentTime = ProcessInfo.processInfo.systemUptime * 1000.0
                     if (currentTime - mySelf.lastKeyTime) >= 120.0 {
                         mySelf.lastKeyTime = currentTime
-                        // Apply intensity multiplier to keystrokes (tick profile)
+                        // Scale typing feedback with custom slider value
                         mySelf.triggerHaptics(actuationID: 1, intensity: 0.9 * mySelf.intensityMultiplier)
                     }
                 }
