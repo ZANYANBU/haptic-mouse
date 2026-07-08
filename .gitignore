@@ -1,0 +1,11 @@
+# Compiled binaries
+haptic-mouse
+test-haptic
+
+# App Bundles and assets
+HapticMouse.app/
+HapticMouse.icns
+HapticMouse.iconset/
+
+# OS metadata
+.DS_Store
