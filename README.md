@@ -40,7 +40,7 @@
 ## 🚀 Quick Start & Installation
 
 ### Option 1: Double-Click App Installation
-1. Download or compile `HapticMouse.app`.
+1. Download **[HapticMouse.zip](https://github.com/ZANYANBU/haptic-mouse/releases/latest/download/HapticMouse.zip)** and unzip it (Apple Silicon, macOS 11 or later), or compile it as in Option 2.
 2. Move it to your standard **Applications** folder:
    ```bash
    mv HapticMouse.app /Applications/
@@ -48,6 +48,10 @@
 3. Double-click `/Applications/HapticMouse.app` in Finder to launch it.
 4. When prompted, follow the prompt to open **System Settings** and switch **ON** the Accessibility permission for **HapticMouse**.
    *(If it doesn't prompt you, navigate to **System Settings > Privacy & Security > Accessibility** and toggle it manually).*
+
+> **First launch:** the app is not notarised by Apple, so macOS blocks it once. Open
+> **System Settings → Privacy & Security**, scroll down and click **Open Anyway**,
+> or run `xattr -dr com.apple.quarantine /Applications/HapticMouse.app`.
 
 ### Option 2: Build From Source
 Compile the Swift code directly using macOS's built-in compiler:
@@ -57,7 +61,7 @@ git clone https://github.com/ZANYANBU/haptic-mouse.git
 cd haptic-mouse
 
 # Compile the Swift source
-swiftc -O HapticMouse.swift -o HapticMouseBin
+swiftc -O -target arm64-apple-macos11.0 HapticMouse.swift -o HapticMouseBin
 
 # Create the macOS App Bundle structure
 mkdir -p HapticMouse.app/Contents/MacOS
