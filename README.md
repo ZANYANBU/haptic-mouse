@@ -82,6 +82,16 @@ To make HapticMouse run automatically whenever your Mac boots up:
 2. Click the **`+` (Plus)** button under the "Open at Login" list.
 3. Select **`HapticMouse.app`** from `/Applications`.
 
+Alternatively, from a clone of this repository, run the installer. It registers a LaunchAgent that starts HapticMouse at login and relaunches it if it quits. Use one method or the other, not both:
+```bash
+./install.sh            # ./install.sh --dry-run previews the LaunchAgent without installing it
+```
+The installer looks for `HapticMouse.app` in `/Applications`, then `~/Applications`. To remove the LaunchAgent:
+```bash
+launchctl unload ~/Library/LaunchAgents/com.user.hapticmouse.plist
+rm ~/Library/LaunchAgents/com.user.hapticmouse.plist
+```
+
 ### Testing Haptic Motor Directly
 Verify your trackpad's haptic motor is functional directly, independent of Accessibility permission states:
 ```bash
