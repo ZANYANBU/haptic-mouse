@@ -2,6 +2,7 @@
 
 # HapticMouse 📳
 
+[![Build](https://github.com/ZANYANBU/haptic-mouse/actions/workflows/build.yml/badge.svg)](https://github.com/ZANYANBU/haptic-mouse/actions/workflows/build.yml)
 [![Platform](https://img.shields.io/badge/platform-macOS%2010.15%2B-blue.svg)](https://apple.com)
 [![Language](https://img.shields.io/badge/language-Swift%205-orange.svg)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)

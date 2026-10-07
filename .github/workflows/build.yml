@@ -1,0 +1,30 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: Build the app
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build HapticMouse.app
+        run: |
+          swiftc -O -target arm64-apple-macos11.0 HapticMouse.swift -o HapticMouseBin
+          mkdir -p HapticMouse.app/Contents/MacOS
+          mv HapticMouseBin HapticMouse.app/Contents/MacOS/HapticMouse
+          cp Info.plist HapticMouse.app/Contents/Info.plist
+          codesign --force --deep --sign - HapticMouse.app
+      - name: Check the bundle
+        run: |
+          test -x HapticMouse.app/Contents/MacOS/HapticMouse
+          plutil -lint HapticMouse.app/Contents/Info.plist
+          codesign --verify --deep --strict HapticMouse.app
+      - name: Build the haptic motor test
+        run: swiftc -O -target arm64-apple-macos11.0 TestHaptic.swift -o test-haptic
+      - name: Check the installer
+        run: |
+          bash -n install.sh
+          plutil -lint com.user.hapticmouse.plist
