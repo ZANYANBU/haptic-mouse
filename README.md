@@ -9,6 +9,8 @@
 [![Battery](https://img.shields.io/badge/battery-ultra--efficient-brightgreen.svg)](#-battery-efficiency)
 [![Privacy](https://img.shields.io/badge/privacy-100%25--secure-success.svg)](#-privacy-protection)
 
+**[Website](https://zanyanbu.github.io/haptic-mouse/)** · **[Download for Mac](https://github.com/ZANYANBU/haptic-mouse/releases/latest/download/HapticMouse.zip)**
+
 > **HapticMouse gives any external mouse a haptic scroll wheel.** Plug in a $20 USB mouse and feel a crisp Taptic-Engine detent on every scroll notch and click — borrowed live from your MacBook's trackpad. (Plus tactile typing feedback, if you want it!)
 
 ---
